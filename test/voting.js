@@ -41,4 +41,12 @@ describe("Voting contract", function () {
         })
     })
 
+    describe("vote functionality", function() {
+        it("User can vote only for created votings", async function() {
+            let addr2Contract = await (await (await Voting.deploy()).connect(addr2));
+            await addr2Contract.vote(addr2.address, ethers.utils.parseEther("0.01").toString());
+            //.to.not.be.reverted;
+        })
+    })
+
 })

@@ -12,13 +12,14 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const Token = await ethers.getContractFactory("Token");
-  const token = await Token.deploy();
+  //const Token = await ethers.getContractFactory("Token");
+  //const token = await Token.deploy();
 
-  token.transfer(acc2.address, 100);
-  console.log("acc2 at addr %s now has %s", acc2.address, (await acc2.getBalance()).toString())
+  //token.transfer(acc2.address, 100);
+  //console.log("acc2 at addr %s now has %s", acc2.address, (await acc2.getBalance()).toString())
 
-  console.log("Token address:", token.address);
+  //console.log("Token address:", token.address);
+  const Voting = await ethers.getContractFactory("Voting");
 }
 
 main()
