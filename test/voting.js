@@ -35,11 +35,8 @@ describe("Voting contract", function () {
 
         it("Voting has been successfully created", async function () {
             for (let i = 0; i < 100; ++i) {
-                //await expect(notOwnerContract.addVoting(2, [addr2.address]))
-                //.to.be.revertedWith('Only admin can create new votings');
                 await expect(ownerContract.addVoting(i, [addrs[i % addrs.length].address]))
                 .to.not.be.reverted;
-                //await ownerContract.addVoting(i, [addrs[i % addrs.length].address]);
             }
         })
     })
