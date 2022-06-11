@@ -5,7 +5,7 @@ The Voting contract implementation.
 Try running some of the following tasks:
 
 ```shell
-npx hardhat addvoting `DEPLOYED_CONTRACT_ADDRESS` `VOTING_ID` `CANDIDATES...`
+npx hardhat addvoting `DEPLOYED_CONTRACT_ADDRESS` `VOTING_ID` `...CANDIDATES`
 npx hardhat vote `DEPLOYED_CONTRACT_ADDRESS` `VOTING_ID` `CANDIDATE`
 npx hardhat finishvoting `DEPLOYED_CONTRACT_ADDRESS` `VOTING_ID`
 npx hardhat withdraw `DEPLOYED_CONTRACT_ADDRESS` 
