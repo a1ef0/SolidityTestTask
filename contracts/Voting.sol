@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Voting {
 
@@ -10,17 +11,19 @@ contract Voting {
     struct Voter {
         address voter;
         mapping (uint256 => bool) voted;
-        mapping (uint256 => address) candidate;
     }
 
-    address public owner;
+    address payable public owner;
     mapping (uint => uint256) public createTime;
+    uint256 comission;
 
     mapping (address => Voter) public voters;
     mapping (uint256 => address payable []) public candidates;
+    mapping (uint256 => address) public winners;
 
     constructor () {
-        owner = msg.sender;
+        owner = payable(msg.sender);
+        comission = 0;
     }
 
     function addVoting(uint256 votingId, address payable [] memory votees) external {
@@ -32,7 +35,7 @@ contract Voting {
         }
     }
 
-    function vote(uint256 votingId, address payable votee) public payable {
+    function vote(uint256 votingId, address payable votee) external payable {
         address voter = msg.sender;
         require (msg.value >= 0.01 ether, "You must send at least 0.01 ETH");
         require (votings[votingId][votee] != 0, "You can vote only in created votings");
@@ -46,8 +49,8 @@ contract Voting {
         }
     }
 
-    function finishVoting(uint256 votingId) public{
-        require (block.timestamp >= (createTime[votingId] + 10 seconds), "3 days should pass before closing the voting");
+    function finishVoting(uint256 votingId) external {
+        require (block.timestamp >= (createTime[votingId] + 3 seconds), "3 days should pass before closing the voting");
         address payable winner;
         int256 votes = -1;
         int256 totalVotes = 0;
@@ -63,10 +66,40 @@ contract Voting {
             }
             votings[votingId][pretendents[i]] = 0;
         }
+        comission += uint256(totalVotes) * 1000000 gwei;
         winner.transfer(uint256(totalVotes) * 9000000 gwei); 
+        winners[votingId] = winner;
     }
 
-    function showFees() public{
+    function withdraw() external {
+        require (msg.sender == owner, "Only admin can withdraw the comission");
+        owner.transfer(comission);
+    }
 
+    function showInfo(uint256 votingId) external view returns (string memory){
+        address payable [] memory curCandidates = candidates[votingId];
+        uint256 n = curCandidates.length;
+        if (n == 0) {
+            return "The voting has not started yet";
+        }
+        if (n != 0 && votings[votingId][curCandidates[0]] == 0) {
+            string memory message = "The voting has already ended, winner is ";
+            string memory win = Strings.toHexString(uint160(winners[votingId]), 20);
+            return string(abi.encodePacked(message, win));
+        } else if (votings[votingId][curCandidates[0]] != 0) {
+            string memory message = "The voting is still in progress, preliminary results are:\n";
+            for (uint i = 0; i < n; i++) {
+                string memory candidate = Strings.toHexString(uint160(address(curCandidates[i])), 20);
+                uint256 votes;
+                if (votings[votingId][curCandidates[i]] == -1){
+                    votes = 0;    
+                } else {
+                    votes = uint256(votings[votingId][curCandidates[i]]);
+                }
+                string memory tmp = string(abi.encodePacked(candidate, " - ", Strings.toHexString(votes)));
+                message = string(abi.encodePacked(message, tmp, "\n"));
+            }
+            return message;
+        }
     }
 }

@@ -11,15 +11,19 @@ describe("Voting contract", function () {
     let addr1;
     let addr2;
     let addrs;
+    
+    let amount = {
+        value: ethers.utils.parseEther("0.01")   
+    };
+
+    const sleep = (milliseconds) => {
+        return new Promise(resolve => setTimeout(resolve, milliseconds))
+    }
 
     beforeEach(async function () {
-        // Get the ContractFactory and Signers here.
         Voting = await ethers.getContractFactory("Voting");
         [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
-    
-        // To deploy our contract, we just have to call Token.deploy() and await
-        // for it to be deployed(), which happens once its transaction has been
-        // mined.
+        
         voting = await Voting.deploy();
         await voting.deployed();
     });
@@ -40,9 +44,6 @@ describe("Voting contract", function () {
     })
 
     describe("vote() functionality", function() {
-        let amount = {
-            value: ethers.utils.parseEther("0.01")   
-        };
 
         it ("User can vote only for at least 0.01 ETH", async function() {
             let amount = {
@@ -78,15 +79,8 @@ describe("Voting contract", function () {
             .to.not.be.reverted; 
         })
     })
-
+    
     describe("finishVoting() functionality", function() {
-        let amount = {
-            value: ethers.utils.parseEther("0.01")   
-        };
-
-        const sleep = (milliseconds) => {
-            return new Promise(resolve => setTimeout(resolve, milliseconds))
-        }
 
         it("User cannot finish voting before 3 days", async function() {
             await voting.addVoting(1, [addr2.address, addr1.address]);
@@ -98,9 +92,56 @@ describe("Voting contract", function () {
         it("User can succesfully finish voting after 3 days", async function() {
             await voting.addVoting(1, [addr2.address, addr1.address]);
             await voting.connect(addr2).vote(1, addr1.address, amount);
-            await sleep(11000);;
+            await sleep(4000);
             await expect(voting.connect(addr2).finishVoting(1))
             .to.not.be.reverted;
+        })
+    })
+    
+    describe("withdraw() functionality", function() {
+
+        it("User cannot withdraw the comission", async function() {
+            await voting.addVoting(1, [addr2.address, addr1.address]);
+            await voting.connect(addr2).vote(1, addr1.address, amount);
+            await sleep(4000);
+            await voting.connect(addr2).finishVoting(1);
+            await expect(voting.connect(addr2).withdraw())
+            .to.be.revertedWith("Only admin can withdraw the comission");
+        })
+        
+        it("Admin can withdraw the comission", async function() {
+            await voting.addVoting(1, [addr2.address, addr1.address]);
+            await voting.connect(addr2).vote(1, addr1.address, amount);
+            await sleep(4000);
+            await voting.connect(addr2).finishVoting(1);
+            await expect(voting.withdraw())
+            .to.not.be.reverted;
+        })
+    })
+    
+    describe("showInfo() functionality", function() {
+
+        it("Check for non-existing votings", async function() {
+            expect((await voting.showInfo(123)).toString())
+            .to.eq("The voting has not started yet");
+        })
+
+        it("Check whether the voting has ended", async function() {
+            await voting.addVoting(1, [addr2.address, addr1.address]);
+            await voting.connect(addr2).vote(1, addr1.address, amount);
+            await sleep(4000);
+            await voting.connect(addr2).finishVoting(1);
+            expect((await voting.showInfo(1)).toString())
+            .to.eq("The voting has already ended, winner is 0x70997970c51812dc3a010c7d01b50e0d17dc79c8")
+        })
+
+        it("Check how the voting process is going", async function() {
+            await voting.addVoting(1, [addr2.address, addr1.address]);
+            await voting.connect(addr2).vote(1, addr1.address, amount);
+            expect((await voting.showInfo(1)).toString())
+            .to.eq("The voting is still in progress, preliminary results are:\n\
+0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc - 0x00\n\
+0x70997970c51812dc3a010c7d01b50e0d17dc79c8 - 0x01\n");
         })
     })
 })
