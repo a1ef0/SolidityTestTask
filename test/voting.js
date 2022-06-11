@@ -5,9 +5,6 @@ describe("Voting contract", function () {
 
     let Voting;
     let voting;
-    let notOwnerContract;
-    let ownerContract;
-    let owner;
     let addr1;
     let addr2;
     let addrs;
