@@ -84,14 +84,14 @@ describe("Voting contract", function () {
     
     describe("finishVoting() functionality", function() {
 
-        it("User cannot finish voting before 3 days", async function() {
+        it("User cannot finish voting before 3 minutes", async function() {
             await voting.addVoting(1, [addr2.address, addr1.address]);
             await voting.connect(addr2).vote(1, addr1.address, amount);
             await expect(voting.connect(addr2).finishVoting(1))
-            .to.be.revertedWith("3 days should pass before closing the voting");
+            .to.be.revertedWith("3 minutes should pass before closing the voting");
         })
 
-        it("User can succesfully finish voting after 3 days", async function() {
+        it("User can succesfully finish voting after 3 minutes", async function() {
             await voting.addVoting(1, [addr2.address, addr1.address]);
             await voting.connect(addr2).vote(1, addr1.address, amount);
             await sleep(4000);

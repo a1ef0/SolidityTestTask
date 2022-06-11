@@ -50,7 +50,9 @@ contract Voting {
     }
 
     function finishVoting(uint256 votingId) external {
-        require (block.timestamp >= (createTime[votingId] + 3 seconds), "3 days should pass before closing the voting");
+        //Here, since we cannot forge block timestamps, for the sake of time, and ability to test the contract, 
+        //I changed the time required to finish the voting, so the user can finish the voting after 3 minutes, but not 3 days
+        require (block.timestamp >= (createTime[votingId] + 3 minutes), "3 minutes should pass before closing the voting");
         address payable winner;
         int256 votes = -1;
         int256 totalVotes = 0;
@@ -73,7 +75,9 @@ contract Voting {
 
     function withdraw() external {
         require (msg.sender == owner, "Only admin can withdraw the comission");
-        owner.transfer(comission);
+        if (comission > 0){
+            owner.transfer(comission);
+        }
     }
 
     function showInfo(uint256 votingId) external view returns (string memory){

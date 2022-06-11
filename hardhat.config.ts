@@ -9,18 +9,65 @@ import "solidity-coverage";
 
 dotenv.config();
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
+task("addvoting", "Adds new voting")
+  .addPositionalParam("address", "Contract address")
+  .addPositionalParam("votingId", "Id of a new voting")
+  .addVariadicPositionalParam("candidates", "List of candidates for voting")
+  .setAction(async function(taskArgs, hre) {
+    let address = taskArgs["address"];
+    let votingId = taskArgs["votingId"];
+    let candidates = taskArgs["candidates"];
+    let voting = await hre.ethers.getContractAt("Voting", address);
+    await voting.addVoting(votingId, candidates);
+    console.log("New voting has been successfully created");
+  });
 
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
+task("vote", "Vote for candidate")
+  .addPositionalParam("address", "Contract address")
+  .addPositionalParam("votingId", "Id of voting")
+  .addPositionalParam("candidate", "User's candidate")
+  .setAction(async function(taskArgs, hre) {
+    let amount = {
+      value: hre.ethers.utils.parseEther("0.01")   
+    };  
+    let address = taskArgs["address"];
+    let votingId = taskArgs["votingId"];
+    let candidate = taskArgs["candidate"];
+    let voting = await hre.ethers.getContractAt("Voting", address);
+    await voting.vote(votingId, candidate, amount);
+    console.log("You have successfully voted");
+  })
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+task("finishvoting", "Finish the voting")
+  .addPositionalParam("address", "Contract address")
+  .addPositionalParam("votingId", "Id of voting")
+  .setAction(async function(taskArgs, hre) {
+    let address = taskArgs["address"];
+    let votingId = taskArgs["votingId"];
+    let voting = await hre.ethers.getContractAt("Voting", address);
+    await voting.finishVoting(votingId);
+    console.log("You have finished the voting");
+  })
+
+task("withdraw", "Send the comission withdraw to admin")
+  .addPositionalParam("address", "Contract address")
+  .setAction(async function(taskArgs, hre) {
+    let address = taskArgs["address"];
+    let voting = await hre.ethers.getContractAt("Voting", address);
+    await voting.withdraw();
+    console.log("The comission withdraw has benn sent to admin");
+  })
+
+task("showinfo", "Prints the info about running voting")
+.addPositionalParam("address", "Contract address")
+.addPositionalParam("votingId", "Id of voting")
+.setAction(async function(taskArgs, hre) {
+  let address = taskArgs["address"];
+  let votingId = taskArgs["votingId"];
+  let voting = await hre.ethers.getContractAt("Voting", address);
+  console.log((await voting.showInfo(votingId)).toString());
+})
+
 
 const config: HardhatUserConfig = {
   solidity: "0.8.4",
