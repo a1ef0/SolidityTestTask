@@ -39,6 +39,7 @@ contract Voting {
 
     function vote(uint256 votingId, address votee) public payable {
         address voter = msg.sender;
+        //console.log(msg.value);
         require (msg.value >= 0.01 ether, "You must send at least 0.01 ETH");
         require (votings[votingId][votee] != 0, "You can vote only in created votings");
         require (voters[voter].voted[votingId] != true, "You have already voted");
