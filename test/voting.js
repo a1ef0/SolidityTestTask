@@ -73,10 +73,12 @@ describe("Voting contract", function () {
             .to.be.revertedWith("You cannot vote for yourself");            
         })
 
-        it("User can vote if everithing is ok", async function() {
+        it("User can vote if everything is ok", async function() {
             await voting.addVoting(1, [addr2.address, addr1.address]);
             await expect(voting.connect(addr2).vote(1, addr1.address, amount))
-            .to.not.be.reverted; 
+            .to.not.be.reverted;
+            await expect(voting.connect(addrs[0]).vote(1, addr1.address, amount))
+            .to.not.be.reverted;
         })
     })
     

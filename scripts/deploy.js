@@ -1,0 +1,19 @@
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+
+async function main() {
+  let Voting;
+  let voting;
+  
+  Voting = await ethers.getContractFactory("Voting");      
+  voting = await Voting.deploy();
+  await voting.deployed();
+  console.log("Voting deployed to:", voting.address);
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

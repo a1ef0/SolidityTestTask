@@ -86,7 +86,7 @@ contract Voting {
             string memory message = "The voting has already ended, winner is ";
             string memory win = Strings.toHexString(uint160(winners[votingId]), 20);
             return string(abi.encodePacked(message, win));
-        } else if (votings[votingId][curCandidates[0]] != 0) {
+        } else {
             string memory message = "The voting is still in progress, preliminary results are:\n";
             for (uint i = 0; i < n; i++) {
                 string memory candidate = Strings.toHexString(uint160(address(curCandidates[i])), 20);
