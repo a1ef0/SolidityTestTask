@@ -24,7 +24,7 @@ describe("Voting contract", function () {
         await voting.deployed();
     });
 
-    describe("addVoting functionality", function() {
+    describe("addVoting() functionality", function() {
         it("Only owner is able to create new votings", async function() {
             expect(await voting.addVoting(1, [addr2.address]));
             await expect(voting.connect(addr1).addVoting(2, [addr2.address]))
@@ -39,7 +39,7 @@ describe("Voting contract", function () {
         })
     })
 
-    describe("vote functionality", function() {
+    describe("vote() functionality", function() {
         let amount = {
             value: ethers.utils.parseEther("0.01")   
         };
@@ -71,6 +71,36 @@ describe("Voting contract", function () {
             await expect(voting.connect(addr2).vote(1, addr2.address, amount))
             .to.be.revertedWith("You cannot vote for yourself");            
         })
+
+        it("User can vote if everithing is ok", async function() {
+            await voting.addVoting(1, [addr2.address, addr1.address]);
+            await expect(voting.connect(addr2).vote(1, addr1.address, amount))
+            .to.not.be.reverted; 
+        })
     })
 
+    describe("finishVoting() functionality", function() {
+        let amount = {
+            value: ethers.utils.parseEther("0.01")   
+        };
+
+        const sleep = (milliseconds) => {
+            return new Promise(resolve => setTimeout(resolve, milliseconds))
+        }
+
+        it("User cannot finish voting before 3 days", async function() {
+            await voting.addVoting(1, [addr2.address, addr1.address]);
+            await voting.connect(addr2).vote(1, addr1.address, amount);
+            await expect(voting.connect(addr2).finishVoting(1))
+            .to.be.revertedWith("3 days should pass before closing the voting");
+        })
+
+        it("User can succesfully finish voting after 3 days", async function() {
+            await voting.addVoting(1, [addr2.address, addr1.address]);
+            await voting.connect(addr2).vote(1, addr1.address, amount);
+            await sleep(11000);;
+            await expect(voting.connect(addr2).finishVoting(1))
+            .to.not.be.reverted;
+        })
+    })
 })
