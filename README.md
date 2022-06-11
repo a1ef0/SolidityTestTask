@@ -16,7 +16,7 @@ npx hardhat test
 npx hardhat node
 npx hardhat help
 REPORT_GAS=true npx hardhat test
-npx hardhat coverage
+npx hardhat coverage --network NETWORK
 npx hardhat run scripts/deploy.js
 ```
 

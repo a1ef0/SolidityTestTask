@@ -83,6 +83,8 @@ const config: HardhatUserConfig = {
         passphrase: "",
       },
     },
+    hardhat: {
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
